@@ -1,0 +1,71 @@
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+
+file.choose()
+#CONOCIENDO LOS DATOS y ALRMANTE NUMERO DE MUERTES
+yearly <-read_csv("C:\\Users\\augus\\Downloads\\CIENCIAS DE LA COMPUTACION\\TRIMESTRE_1_2022\\FUNDAMENTOS PROGRAMACION\\PROYECTO#1\\deaths_handwashing.csv")
+head(yearly)
+
+#MUERTE EN CLINICAS
+yearly_1 <- yearly%>%
+  mutate(proportion_deaths=deaths/births)
+
+proportion_deaths_1 <- yearly_1%>%
+  select(proportion_deaths,year,clinic)
+proportion_deaths_1
+
+ggplot(proportion_deaths_1,aes(x=year,y=proportion_deaths,color=clinic))+geom_line()
+
+#COMIENZA EL LAVADO DE MANOS
+file.choose()
+monthly <- read_csv("C:\\Users\\augus\\Downloads\\CIENCIAS DE LA COMPUTACION\\TRIMESTRE_1_2022\\FUNDAMENTOS PROGRAMACION\\PROYECTO#1\\deaths_clinic_1.csv")
+head(monthly)
+
+monthly_1 <- monthly %>%
+  mutate(proportion_deaths_2=deaths/births)
+head(monthly_1)
+
+#EFECTO DEL LAVADO DE MANOS
+ggplot(monthly_1,aes(x=date,y=proportion_deaths_2))+geom_line()+
+  labs(x="FECHA",y="PROPORCION DE MUERTES")
+
+death_by_year <- monthly %>%
+  group_by(años=as.numeric(format(date,"%Y")))%>%
+  select(años,deaths)%>%
+  group_by(años)%>%
+  summarize(promedio_anual=mean(deaths))
+  
+death_by_year
+  
+ggplot(death_by_year, aes(x=años,y=promedio_anual))+geom_col()+
+  scale_x_binned()
+
+#RESULTADOS DEL LAVADO DE MANOS
+death_by_year_2<- monthly_1 %>%
+  group_by(años=as.numeric(format(date,"%Y")))%>%
+  mutate(años,hand_washing_started=ifelse(años>=1847,TRUE,FALSE))
+death_by_year_2
+
+ggplot(death_by_year_2,aes(x=date,y=proportion_deaths_2,color=hand_washing_started))+
+  geom_line()+
+  labs(x="AÑOS",y="PROPORCION DE MUERTES")
+
+
+
+#Analisis estadistico del lavado de manos.
+
+prueba_t <- t.test(proportion_deaths_2~hand_washing_started,data=death_by_year_2)
+prueba_t
+
+
+#¿Más lavado de manos menos muertes?
+
+month_summary <- death_by_year_2%>%
+  group_by(hand_washing_started)%>%
+  summarize(mean_proportion_deaths=mean(proportion_deaths_2))
+month_summary
+```
+
